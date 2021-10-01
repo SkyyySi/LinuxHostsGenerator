@@ -1,12 +1,18 @@
-#!/bin/bash 
-
+#!/usr/bin/env bash
 #################################################
 # https://github.com/furkun/LinuxHostsGenerator #
 #################################################
 
-rm -rf hosts-files
-mkdir hosts-files
-rm -f hosts hosts.tmp
+# Variables
+VERSION="2.0"
+TEMPDIR="/tmp/${USER:-$(whoami)}-hosts-files"
+WORKDIR="${TEMPDIR}/working"
+
+clean_temp() {
+    rm -rf "${TEMPDIR}"
+    mkdir "${TEMPDIR}"
+    #rm -f hosts hosts.tmp  # Now in "${WORKDIR}"
+}
 
 if [[ ! -f "hosts-sources.txt" ]]; then
     echo "hosts-sources.txt doesn't exist."
@@ -31,11 +37,7 @@ echo "-----Compressing hosts file..."
 sed -i 's/#.*$//;/^$/d' hosts.tmp
 awk '!seen[$0]++' hosts.tmp > hosts
 rm -f hosts.tmp
-sed -i 's/  / /' hosts
-sed -i 's/   / /' hosts
-sed -i 's/    / /' hosts
-sed -i 's/     / /' hosts
-sed -i 's/	/ /' hosts
+sed -Ei 's| +| |g' hosts
 
 echo "-----hosts file is compressed."
 sed -i '/127.0.0.1 localhost/d' hosts
